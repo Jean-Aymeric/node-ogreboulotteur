@@ -3,24 +3,31 @@ const MAP_WIDTH = 20
 const SCREEN_HEIGHT = 10
 const SCREEN_WIDTH = 10
 const TREE_SPRITE = 'T'
+const CHILD_SPRITE = 'e'
+const DEAD_SPRITE = '¤'
 const GROUND_SPRITE = ' '
 const OGRE_SPRITE = 'ö'
 const FOREST_DENSITY = 20
+const CHILDREN_DENSITY = 20
 const PROMPT = require('prompt-sync')();
 
+let forest = [[]]
 let ogrePosition = [MAP_HEIGHT / 2, MAP_WIDTH / 2]
-
-let map = [[]]
+let children = [[]]
 for (let row = 0; row < MAP_HEIGHT; row++) {
-    map[row] = []
+    forest[row] = []
+    children[row] = []
     for (let column = 0; column < MAP_WIDTH; column++) {
         if ((row === 0) || (row === MAP_HEIGHT - 1) || (column === 0) || (column === MAP_WIDTH - 1)) {
-            map[row][column] = TREE_SPRITE;
+            forest[row][column] = TREE_SPRITE;
         } else {
             if (Math.floor(Math.random() * 100) <= FOREST_DENSITY) {
-                map[row][column] = TREE_SPRITE;
+                forest[row][column] = TREE_SPRITE;
             } else {
-                map[row][column] = GROUND_SPRITE;
+                forest[row][column] = GROUND_SPRITE;
+                if (Math.floor(Math.random() * 100) <= CHILDREN_DENSITY) {
+                    children[row][column] = CHILD_SPRITE;
+                }
             }
         }
     }
@@ -36,8 +43,10 @@ while (running) {
                 line += OGRE_SPRITE;
             } else if ((row < 0) || (row >= MAP_HEIGHT) || (column < 0) || (column >= MAP_WIDTH)) {
                 line += TREE_SPRITE;
+            } else if (children[row][column] !== undefined) {
+                line += children[row][column];
             } else {
-                line += map[row][column];
+                line += forest[row][column];
             }
         }
         console.log(line);
@@ -68,11 +77,14 @@ while (running) {
         default:
             break;
     }
-    if (map[ogreNewPosition[0]][ogreNewPosition[1]] !== TREE_SPRITE) {
+    if (forest[ogreNewPosition[0]][ogreNewPosition[1]] !== TREE_SPRITE) {
         ogrePosition[0] = ogreNewPosition[0];
         ogrePosition[1] = ogreNewPosition[1];
+        if (children[ogrePosition[0]][ogrePosition[1]] === CHILD_SPRITE) {
+            children[ogrePosition[0]][ogrePosition[1]] = DEAD_SPRITE;
+        }
     }
-     for(let i = 0; i < 50; i++) {
+    for (let i = 0; i < 50; i++) {
         console.log('\r\n');
     }
 }
